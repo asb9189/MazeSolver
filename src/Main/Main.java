@@ -1,6 +1,7 @@
 package Main;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,7 +10,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+
+import java.awt.*;
 
 public class Main extends Application {
 
@@ -32,8 +37,20 @@ public class Main extends Application {
         for (int i = 0; i < Math.sqrt(16); i++) {
             for (int j = 0; j < Math.sqrt(16); j++) {
 
-                Button b = new Button("(" + i + ", " + j + ")");
+                MyButton b = new MyButton("     ");
+                b.setOnAction((event) -> {
+                    if (b.getType() == MyButton.Type.PATH) {
+                        b.setType(MyButton.Type.WALL);
+                    } else if (b.getType() == MyButton.Type.WALL) {
+                        b.setType(MyButton.Type.START);
+                    } else if (b.getType() == MyButton.Type.START) {
+                        b.setType(MyButton.Type.FINISH);
+                    } else {
+                        b.setType(MyButton.Type.PATH);
+                    }
+                });
                 b.setStyle("-fx-background-radius: 0");
+                b.setStyle("-fx-background-color: #FFFFFF; ");
                 gridPane.add(b, j, i);
 
             }
