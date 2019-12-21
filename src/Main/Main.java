@@ -17,7 +17,9 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class Main extends Application {
 
@@ -44,6 +46,24 @@ public class Main extends Application {
         Button solveButton = new Button("Solve");
         solveButton.setOnAction((event) -> {
 
+            //Check to make sure we have a start and finish node
+            int numStart = 0;
+            int numFinish = 0;
+
+            for (Node node : gridPane.getChildren()) {
+                MyButton b = (MyButton) node;
+                if (b.getType() == MyButton.Type.START) {
+                    numStart++;
+                } else if (b.getType() == MyButton.Type.FINISH) {
+                    numFinish++;
+                }
+            }
+
+            if (numStart != 1 || numFinish != 1) {
+                return;
+            }
+
+
             //convert the current buttons into a graph of nodes
             MyButton[][] arr = new MyButton[(int) Math.sqrt(DIM)][(int) Math.sqrt(DIM)];
 
@@ -63,8 +83,7 @@ public class Main extends Application {
             //give them the appropriate neighbor's.
 
 
-            int startNodeCounter = 0;
-            int finishNodeCounter = 0;
+            HashMap<Integer, MyNode> finalizedNodes = new HashMap<Integer, MyNode>();
 
             for (int i = 0; i < Math.sqrt(DIM); i++) {
                 for (int j = 0; j < Math.sqrt(DIM); j++) {
@@ -77,38 +96,41 @@ public class Main extends Application {
                     MyNode right = null;
                     MyNode bottom = null;
 
-                    if (startNodeCounter > 1 || finishNodeCounter > 1) {
-                        System.out.println("There can only be one start and one finish node");
-                        stop();
-                    }
-
-                    if (currentButton.getType() == MyButton.Type.WALL) {
-                        continue;
-                    } else if (currentButton.getType() == MyButton.Type.PATH) {
-                        node = new MyNode(currentButton.getText(), MyNode.Type.PATH);
-                    } else if (currentButton.getType() == MyButton.Type.START) {
-                        node = new MyNode(currentButton.getText(), MyNode.Type.START);
-                        startNodeCounter++;
+                    if (finalizedNodes.containsKey(Integer.parseInt(currentButton.getName()))) {
+                        node = finalizedNodes.get(Integer.parseInt(currentButton.getName()));
                     } else {
-                        node = new MyNode(currentButton.getText(), MyNode.Type.FINISH);
-                        finishNodeCounter++;
+                        if (currentButton.getType() == MyButton.Type.WALL) {
+                            continue;
+                        } else if (currentButton.getType() == MyButton.Type.PATH) {
+                            node = new MyNode(currentButton.getText(), MyNode.Type.PATH);
+                        } else if (currentButton.getType() == MyButton.Type.START) {
+                            node = new MyNode(currentButton.getText(), MyNode.Type.START);
+                        } else {
+                            node = new MyNode(currentButton.getText(), MyNode.Type.FINISH);
+                        }
                     }
 
                     //above
                     try {
 
                         MyButton aboveButton = arr[i - 1][j];
-
-                        if (aboveButton.getType() == MyButton.Type.WALL) {
-                            top = null;
-                        } else if (aboveButton.getType() == MyButton.Type.PATH) {
-                            top = new MyNode(aboveButton.getText(), MyNode.Type.PATH);
-                        } else if (aboveButton.getType() == MyButton.Type.START) {
-                            top = new MyNode(aboveButton.getText(), MyNode.Type.START);
+                        //check if the button above us has already been created
+                        if (finalizedNodes.containsKey(Integer.parseInt(aboveButton.getName()))) {
+                            top = finalizedNodes.get(Integer.parseInt(aboveButton.getName()));
                         } else {
-                            top = new MyNode(aboveButton.getText(), MyNode.Type.FINISH);
+                            if (aboveButton.getType() == MyButton.Type.WALL) {
+                                top = null;
+                            } else if (aboveButton.getType() == MyButton.Type.PATH) {
+                                top = new MyNode(aboveButton.getText(), MyNode.Type.PATH);
+                                finalizedNodes.put(Integer.parseInt(top.getName()), top);
+                            } else if (aboveButton.getType() == MyButton.Type.START) {
+                                top = new MyNode(aboveButton.getText(), MyNode.Type.START);
+                                finalizedNodes.put(Integer.parseInt(top.getName()), top);
+                            } else {
+                                top = new MyNode(aboveButton.getText(), MyNode.Type.FINISH);
+                                finalizedNodes.put(Integer.parseInt(top.getName()), top);
+                            }
                         }
-
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
@@ -118,16 +140,22 @@ public class Main extends Application {
 
                         MyButton leftButton = arr[i][j - 1];
 
-                        if (leftButton.getType() == MyButton.Type.WALL) {
-                            left = null;
-                        } else if (leftButton.getType() == MyButton.Type.PATH) {
-                            left = new MyNode(leftButton.getText(), MyNode.Type.PATH);
-                        } else if (leftButton.getType() == MyButton.Type.START) {
-                            left = new MyNode(leftButton.getText(), MyNode.Type.START);
+                        if (finalizedNodes.containsKey(Integer.parseInt(leftButton.getName()))) {
+                            left = finalizedNodes.get(Integer.parseInt(leftButton.getName()));
                         } else {
-                            left = new MyNode(leftButton.getText(), MyNode.Type.FINISH);
+                            if (leftButton.getType() == MyButton.Type.WALL) {
+                                left = null;
+                            } else if (leftButton.getType() == MyButton.Type.PATH) {
+                                left = new MyNode(leftButton.getText(), MyNode.Type.PATH);
+                                finalizedNodes.put(Integer.parseInt(left.getName()), left);
+                            } else if (leftButton.getType() == MyButton.Type.START) {
+                                left = new MyNode(leftButton.getText(), MyNode.Type.START);
+                                finalizedNodes.put(Integer.parseInt(left.getName()), left);
+                            } else {
+                                left = new MyNode(leftButton.getText(), MyNode.Type.FINISH);
+                                finalizedNodes.put(Integer.parseInt(left.getName()), left);
+                            }
                         }
-
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
@@ -137,16 +165,22 @@ public class Main extends Application {
 
                         MyButton rightButton = arr[i][j + 1];
 
-                        if (rightButton.getType() == MyButton.Type.WALL) {
-                            right = null;
-                        } else if (rightButton.getType() == MyButton.Type.PATH) {
-                            right = new MyNode(rightButton.getText(), MyNode.Type.PATH);
-                        } else if (rightButton.getType() == MyButton.Type.START) {
-                            right = new MyNode(rightButton.getText(), MyNode.Type.START);
+                        if (finalizedNodes.containsKey(Integer.parseInt(rightButton.getName()))) {
+                            right = finalizedNodes.get(Integer.parseInt(rightButton.getName()));
                         } else {
-                            right = new MyNode(rightButton.getText(), MyNode.Type.FINISH);
+                            if (rightButton.getType() == MyButton.Type.WALL) {
+                                right = null;
+                            } else if (rightButton.getType() == MyButton.Type.PATH) {
+                                right = new MyNode(rightButton.getText(), MyNode.Type.PATH);
+                                finalizedNodes.put(Integer.parseInt(right.getName()), right);
+                            } else if (rightButton.getType() == MyButton.Type.START) {
+                                right = new MyNode(rightButton.getText(), MyNode.Type.START);
+                                finalizedNodes.put(Integer.parseInt(right.getName()), right);
+                            } else {
+                                right = new MyNode(rightButton.getText(), MyNode.Type.FINISH);
+                                finalizedNodes.put(Integer.parseInt(right.getName()), right);
+                            }
                         }
-
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
@@ -156,16 +190,22 @@ public class Main extends Application {
 
                         MyButton bottomButton = arr[i + 1][j];
 
-                        if (bottomButton.getType() == MyButton.Type.WALL) {
-                            bottom = null;
-                        } else if (bottomButton.getType() == MyButton.Type.PATH) {
-                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.PATH);
-                        } else if (bottomButton.getType() == MyButton.Type.START) {
-                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.START);
+                        if (finalizedNodes.containsKey(Integer.parseInt(bottomButton.getName()))) {
+                            bottom = finalizedNodes.get(Integer.parseInt(bottomButton.getName()));
                         } else {
-                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.FINISH);
+                            if (bottomButton.getType() == MyButton.Type.WALL) {
+                                bottom = null;
+                            } else if (bottomButton.getType() == MyButton.Type.PATH) {
+                                bottom = new MyNode(bottomButton.getText(), MyNode.Type.PATH);
+                                finalizedNodes.put(Integer.parseInt(bottom.getName()), bottom);
+                            } else if (bottomButton.getType() == MyButton.Type.START) {
+                                bottom = new MyNode(bottomButton.getText(), MyNode.Type.START);
+                                finalizedNodes.put(Integer.parseInt(bottom.getName()), bottom);
+                            } else {
+                                bottom = new MyNode(bottomButton.getText(), MyNode.Type.FINISH);
+                                finalizedNodes.put(Integer.parseInt(bottom.getName()), bottom);
+                            }
                         }
-
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
@@ -187,13 +227,10 @@ public class Main extends Application {
                     if (bottom != null) {
                         node.addNeighbor(bottom);
                     }
+
+                    finalizedNodes.put(Integer.parseInt(node.getName()), node);
                     graphNodes.add(node);
                 }
-            }
-
-            if (startNodeCounter != 1 || finishNodeCounter != 1) {
-                System.out.println("There needs to exist at least one start and one finish node");
-                stop();
             }
 
             MyNode start = null;
@@ -210,7 +247,7 @@ public class Main extends Application {
             //Here each node has been created with a complete list of its neigbores and is now ready to be passed into
             //the BFS algorithm
             Graph graph = new Graph(start, finish, graphNodes.size(), graphNodes);
-            BFS bfs = new BFS(graph);
+            BFS bfs = new BFS(graph, gridPane, vbox);
             bfs.run();
 
             //wait for the BFS thread to finish processing
@@ -227,7 +264,29 @@ public class Main extends Application {
             stop();
         });
         vbox.getChildren().add(solveButton);
-        vbox.getChildren().add(new Button("Randomize"));
+
+        Button randomizeButton = new Button("Randomize");
+
+        randomizeButton.setOnAction((event) -> {
+            randomizeGrid();
+        });
+
+        vbox.getChildren().add(randomizeButton);
+
+        Button resetButton = new Button("Reset");
+        resetButton.setOnAction((event) -> {
+            //loop through each button and set its type to path
+            for (Node node : gridPane.getChildren()) {
+                MyButton b = (MyButton) node;
+                b.setType(MyButton.Type.PATH);
+            }
+            gridPane.setDisable(false);
+            vbox.getChildren().get(0).setDisable(false);
+            vbox.getChildren().get(1).setDisable(false);
+        });
+
+        vbox.getChildren().add(resetButton);
+
         vbox.getChildren().add(exitButton);
 
         gridPane = new GridPane();
@@ -267,6 +326,42 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+
+    }
+
+    private void randomizeGrid() {
+
+        Random rand = new Random();
+
+        //Set each node to either a path or wall randomly
+        for (int i = 0; i < DIM; i++) {
+
+            MyButton b = (MyButton) gridPane.getChildren().get(i);
+
+            int num = rand.nextInt(2);
+
+            if (num == 1) {
+                b.setType(MyButton.Type.PATH);
+            } else {
+                b.setType(MyButton.Type.WALL);
+            }
+
+        }
+
+        //set 2 random nodes to be a start and finish node
+
+        int startLocation = rand.nextInt(DIM);
+
+        MyButton s = (MyButton) gridPane.getChildren().get(startLocation);
+        s.setType(MyButton.Type.START);
+
+        int finishLocation = rand.nextInt(DIM);
+        while (finishLocation == startLocation) {
+            finishLocation = rand.nextInt(DIM);
+        }
+
+        MyButton f = (MyButton) gridPane.getChildren().get(finishLocation);
+        f.setType(MyButton.Type.FINISH);
 
     }
 
