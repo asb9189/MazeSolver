@@ -10,7 +10,6 @@ public class MyNode {
 
     public enum Type {
         PATH,
-        WALL,
         START,
         FINISH
     }
@@ -24,7 +23,7 @@ public class MyNode {
     public String getNeighborsAsString() {
         String names = "";
         for (int i = 0; i < neighbors.size(); i++) {
-            names += neighbors.get(i).getName() + ", ";
+            names += neighbors.get(i).getName() + " ";
         }
         return names;
     }
@@ -52,6 +51,10 @@ public class MyNode {
 
     public Type getType() {
         return type;
+    }
+
+    public ArrayList<MyNode> getNeighbors() {
+        return neighbors;
     }
 
 }
