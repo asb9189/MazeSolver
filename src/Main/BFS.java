@@ -74,6 +74,11 @@ public class BFS extends Thread implements Runnable {
 
         if (!solution) {
             System.out.println("No Path");
+            Label l = (Label) labels.getChildren().get(0);
+            l.setText("No Solution");
+
+            Label l2 = (Label) labels.getChildren().get(1);
+            l2.setText("N/A");
         }
 
 
