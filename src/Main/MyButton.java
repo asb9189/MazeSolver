@@ -48,4 +48,7 @@ public class MyButton extends Button {
         return this.name + ", type: " + this.getType();
     }
 
+    public String getName() {
+        return name;
+    }
 }
