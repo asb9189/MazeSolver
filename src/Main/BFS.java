@@ -1,5 +1,6 @@
 package Main;
 
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -21,11 +22,13 @@ public class BFS extends Thread implements Runnable {
     private boolean solution;
     private GridPane gridPane;
     private VBox buttons;
+    private VBox labels;
 
-    public BFS(Graph graph, GridPane gridPane, VBox vbox) {
+    public BFS(Graph graph, GridPane gridPane, VBox vbox, VBox labels) {
         this.graph = graph;
         this.gridPane = gridPane;
         this.buttons = vbox;
+        this.labels = labels;
         start = graph.getStart();
         finish = graph.getFinish();
         queue = new LinkedList<MyNode>();
@@ -105,6 +108,12 @@ public class BFS extends Thread implements Runnable {
         gridPane.setDisable(true);
         buttons.getChildren().get(0).setDisable(true);
         buttons.getChildren().get(1).setDisable(true);
+
+        Label l = (Label) labels.getChildren().get(0);
+        l.setText("Path: " + newPath.toString());
+
+        Label l2 = (Label) labels.getChildren().get(1);
+        l2.setText("Cost: " + (cost - 1) );
 
         System.out.println("Path from Start -> Finish: " + newPath);
         System.out.println("Cost: " + (cost - 1));
