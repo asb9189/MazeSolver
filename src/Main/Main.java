@@ -16,6 +16,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main extends Application {
@@ -47,6 +48,7 @@ public class Main extends Application {
             MyButton[][] arr = new MyButton[(int) Math.sqrt(DIM)][(int) Math.sqrt(DIM)];
 
             List<Node> nodes = gridPane.getChildren();
+            ArrayList<MyNode> graphNodes = new ArrayList<>();
 
             int counter = 0;
             for (int i = 0; i < Math.sqrt(DIM); i++) {
@@ -60,6 +62,10 @@ public class Main extends Application {
             //we can now create a node for each button and
             //give them the appropriate neighbor's.
 
+
+            int startNodeCounter = 0;
+            int finishNodeCounter = 0;
+
             for (int i = 0; i < Math.sqrt(DIM); i++) {
                 for (int j = 0; j < Math.sqrt(DIM); j++) {
 
@@ -71,14 +77,21 @@ public class Main extends Application {
                     MyNode right = null;
                     MyNode bottom = null;
 
+                    if (startNodeCounter > 1 || finishNodeCounter > 1) {
+                        System.out.println("There can only be one start and one finish node");
+                        stop();
+                    }
+
                     if (currentButton.getType() == MyButton.Type.WALL) {
-                        node = new MyNode(currentButton.getText(), MyNode.Type.WALL);
+                        continue;
                     } else if (currentButton.getType() == MyButton.Type.PATH) {
                         node = new MyNode(currentButton.getText(), MyNode.Type.PATH);
                     } else if (currentButton.getType() == MyButton.Type.START) {
                         node = new MyNode(currentButton.getText(), MyNode.Type.START);
+                        startNodeCounter++;
                     } else {
                         node = new MyNode(currentButton.getText(), MyNode.Type.FINISH);
+                        finishNodeCounter++;
                     }
 
                     //above
@@ -87,7 +100,7 @@ public class Main extends Application {
                         MyButton aboveButton = arr[i - 1][j];
 
                         if (aboveButton.getType() == MyButton.Type.WALL) {
-                            top = new MyNode(aboveButton.getText(), MyNode.Type.WALL);
+                            top = null;
                         } else if (aboveButton.getType() == MyButton.Type.PATH) {
                             top = new MyNode(aboveButton.getText(), MyNode.Type.PATH);
                         } else if (aboveButton.getType() == MyButton.Type.START) {
@@ -103,12 +116,36 @@ public class Main extends Application {
                     //left
                     try {
 
+                        MyButton leftButton = arr[i][j - 1];
+
+                        if (leftButton.getType() == MyButton.Type.WALL) {
+                            left = null;
+                        } else if (leftButton.getType() == MyButton.Type.PATH) {
+                            left = new MyNode(leftButton.getText(), MyNode.Type.PATH);
+                        } else if (leftButton.getType() == MyButton.Type.START) {
+                            left = new MyNode(leftButton.getText(), MyNode.Type.START);
+                        } else {
+                            left = new MyNode(leftButton.getText(), MyNode.Type.FINISH);
+                        }
+
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
 
                     //right
                     try {
+
+                        MyButton rightButton = arr[i][j + 1];
+
+                        if (rightButton.getType() == MyButton.Type.WALL) {
+                            right = null;
+                        } else if (rightButton.getType() == MyButton.Type.PATH) {
+                            right = new MyNode(rightButton.getText(), MyNode.Type.PATH);
+                        } else if (rightButton.getType() == MyButton.Type.START) {
+                            right = new MyNode(rightButton.getText(), MyNode.Type.START);
+                        } else {
+                            right = new MyNode(rightButton.getText(), MyNode.Type.FINISH);
+                        }
 
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
@@ -117,13 +154,71 @@ public class Main extends Application {
                     //below
                     try {
 
+                        MyButton bottomButton = arr[i + 1][j];
+
+                        if (bottomButton.getType() == MyButton.Type.WALL) {
+                            bottom = null;
+                        } else if (bottomButton.getType() == MyButton.Type.PATH) {
+                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.PATH);
+                        } else if (bottomButton.getType() == MyButton.Type.START) {
+                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.START);
+                        } else {
+                            bottom = new MyNode(bottomButton.getText(), MyNode.Type.FINISH);
+                        }
+
                     } catch(IndexOutOfBoundsException e) {
                         //ignore the exception
                     }
 
+                    //add the none null buttons in order from: above, left, right, and bottom
+
+                    if (top != null) {
+                        node.addNeighbor(top);
+                    }
+
+                    if (left != null) {
+                        node.addNeighbor(left);
+                    }
+
+                    if (right != null) {
+                        node.addNeighbor(right);
+                    }
+
+                    if (bottom != null) {
+                        node.addNeighbor(bottom);
+                    }
+                    graphNodes.add(node);
                 }
             }
 
+            if (startNodeCounter != 1 || finishNodeCounter != 1) {
+                System.out.println("There needs to exist at least one start and one finish node");
+                stop();
+            }
+
+            MyNode start = null;
+            MyNode finish = null;
+
+            for (MyNode node : graphNodes) {
+                if (node.getType() == MyNode.Type.START) {
+                    start = node;
+                } else if (node.getType() == MyNode.Type.FINISH) {
+                    finish = node;
+                }
+            }
+
+            //Here each node has been created with a complete list of its neigbores and is now ready to be passed into
+            //the BFS algorithm
+            Graph graph = new Graph(start, finish, graphNodes.size(), graphNodes);
+            BFS bfs = new BFS(graph);
+            bfs.run();
+
+            //wait for the BFS thread to finish processing
+            try {
+                bfs.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         });
 
