@@ -3,6 +3,7 @@ package Main;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -26,6 +27,7 @@ public class Main extends Application {
     /** Graphics */
     private BorderPane borderPane;
     private GridPane gridPane;
+    private VBox bottom;
     private int DIM;
 
     public void init() {
@@ -60,6 +62,10 @@ public class Main extends Application {
             }
 
             if (numStart != 1 || numFinish != 1) {
+                Label l = (Label) bottom.getChildren().get(0);
+                l.setText("Path: ");
+                Label l2 = (Label) bottom.getChildren().get(1);
+                l2.setText("Cost: ");
                 return;
             }
 
@@ -247,7 +253,7 @@ public class Main extends Application {
             //Here each node has been created with a complete list of its neigbores and is now ready to be passed into
             //the BFS algorithm
             Graph graph = new Graph(start, finish, graphNodes.size(), graphNodes);
-            BFS bfs = new BFS(graph, gridPane, vbox);
+            BFS bfs = new BFS(graph, gridPane, vbox, bottom);
             bfs.run();
 
             //wait for the BFS thread to finish processing
@@ -283,6 +289,10 @@ public class Main extends Application {
             gridPane.setDisable(false);
             vbox.getChildren().get(0).setDisable(false);
             vbox.getChildren().get(1).setDisable(false);
+            Label l = (Label) bottom.getChildren().get(0);
+            l.setText("Path: ");
+            Label l2 = (Label) bottom.getChildren().get(1);
+            l2.setText("Cost: ");
         });
 
         vbox.getChildren().add(resetButton);
@@ -318,9 +328,21 @@ public class Main extends Application {
 
         borderPane.setCenter(gridPane);
 
-        borderPane.setTop(new Label("Maze Solver"));
+        Label title = new Label("Maze Solver by Aleksei Bingham");
+        title.setAlignment(Pos.CENTER);
+        title.setPadding(new Insets(10));
+
+        borderPane.setTop(title);
         vbox.setPadding(new Insets(10, 10, 10, 10));
         borderPane.setRight(vbox);
+
+        bottom = new VBox();
+        bottom.setPadding(new Insets(15));
+        Label path = new Label("Path: ");
+        Label cost = new Label("Cost: ");
+        bottom.getChildren().add(path);
+        bottom.getChildren().add(cost);
+        borderPane.setBottom(bottom);
 
         Scene scene = new Scene(borderPane);
         primaryStage.setScene(scene);
