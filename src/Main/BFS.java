@@ -57,7 +57,7 @@ public class BFS extends Thread implements Runnable {
                 constructPath();
                 break;
             }
-
+            
             //iterate through all neighbors of the current node
             ArrayList<MyNode> neighbors = currentNode.getNeighbors();
             for (MyNode node : neighbors) {
@@ -80,7 +80,6 @@ public class BFS extends Thread implements Runnable {
             Label l2 = (Label) labels.getChildren().get(1);
             l2.setText("N/A");
         }
-
 
     }
 
