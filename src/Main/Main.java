@@ -66,6 +66,7 @@ public class Main extends Application {
                 l.setText("Path: ");
                 Label l2 = (Label) bottom.getChildren().get(1);
                 l2.setText("Cost: ");
+                AlertDialog.display("Error", "You must have exactly one start and one finish node");
                 return;
             }
 
@@ -256,12 +257,14 @@ public class Main extends Application {
             BFS bfs = new BFS(graph, gridPane, vbox, bottom);
             bfs.run();
 
+            /**
             //wait for the BFS thread to finish processing
             try {
                 bfs.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+             */
 
         });
 
